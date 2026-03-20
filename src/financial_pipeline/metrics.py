@@ -4,7 +4,7 @@ import pandas as pd
 from yahooquery import Ticker
 
 
-def get_financial_data(n: int, tickers: list[str]) -> pd.DataFrame:
+def get_financial_data(tickers: list[str], n: int | None = None) -> pd.DataFrame:
     """Gets financial data for the n first tickers provided.
 
     Data gathered:
@@ -34,19 +34,26 @@ def get_financial_data(n: int, tickers: list[str]) -> pd.DataFrame:
             - if any ticker in tickers is not a string.
     """
     # Checking for potential errors in the input parameters
-    if n < 1:
-        raise ValueError("n must be a positive integer.")
-    elif not isinstance(n, int):
-        raise TypeError("n must be an integer.")
-    elif n > len(tickers):
-        raise ValueError(
-            f"n must be less than or equal to the number of tickers ({len(tickers)})."
-        )
-    elif not isinstance(tickers, list):
+    # Validate tickers (always required, regardless of n)
+    if not isinstance(tickers, list):
         raise TypeError("tickers must be a list.")
-    elif not all(isinstance(ticker, str) for ticker in tickers):
+    if not all(isinstance(ticker, str) for ticker in tickers):
         raise TypeError("All tickers must be strings.")
 
+    # Validate n (only if provided)
+    if n is not None:
+        if not isinstance(n, int) or isinstance(n, bool):
+            raise TypeError("n must be an integer.")
+        if n < 1:
+            raise ValueError("n must be a positive integer.")
+        if n > len(tickers):
+            raise ValueError(
+                f"n must be less than or equal to the number of tickers ({len(tickers)})."
+            )
+
+    # Set default after validation
+    if n is None:
+        n = len(tickers)
     data = {}
     for ticker in tickers[:n]:
         stock = Ticker(ticker)
