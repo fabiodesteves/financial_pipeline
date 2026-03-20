@@ -43,9 +43,9 @@ def get_financial_data(n: int, tickers: list[str]) -> pd.DataFrame:
             f"n must be less than or equal to the number of tickers ({len(tickers)})."
         )
     elif not isinstance(tickers, list):
-        raise ValueError("tickers must be a list.")
+        raise TypeError("tickers must be a list.")
     elif not all(isinstance(ticker, str) for ticker in tickers):
-        raise ValueError("All tickers must be strings.")
+        raise TypeError("All tickers must be strings.")
 
     data = {}
     for ticker in tickers[:n]:
