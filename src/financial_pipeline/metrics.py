@@ -36,12 +36,12 @@ def get_financial_data(n: int, tickers: list[str]) -> pd.DataFrame:
     # Checking for potential errors in the input parameters
     if n < 1:
         raise ValueError("n must be a positive integer.")
+    elif not isinstance(n, int):
+        raise ValueError("n must be an integer.")
     elif n > len(tickers):
         raise ValueError(
             f"n must be less than or equal to the number of tickers ({len(tickers)})."
         )
-    elif not isinstance(n, int):
-        raise ValueError("n must be an integer.")
     elif not isinstance(tickers, list):
         raise ValueError("tickers must be a list.")
     elif not all(isinstance(ticker, str) for ticker in tickers):
@@ -69,7 +69,7 @@ def get_financial_data(n: int, tickers: list[str]) -> pd.DataFrame:
                 )
                 ev = market_cap + total_debt - cash_and_equivalents
                 op_income = income_statement["OperatingIncome"].dropna().iloc[-1]
-            except:
+            except:  # noqa: E722
                 cash_and_equivalents = (
                     balance_sheet["CashAndCashEquivalents"].dropna().iloc[-1]
                 )
@@ -78,7 +78,7 @@ def get_financial_data(n: int, tickers: list[str]) -> pd.DataFrame:
             try:
                 dividend_raw = summary[ticker]["trailingAnnualDividendYield"]
                 dividend_yield = dividend_raw * 100
-            except:
+            except:  # noqa: E722
                 dividend_yield = 0
             try:
                 buyback = (
@@ -90,7 +90,7 @@ def get_financial_data(n: int, tickers: list[str]) -> pd.DataFrame:
                     / 2
                 )
                 buyback_yield = buyback * 100 / market_cap
-            except:
+            except:  # noqa: E722
                 buyback_yield = 0
             data[ticker] = {
                 "P/E": market_cap / net_income,
