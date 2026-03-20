@@ -10,7 +10,7 @@ class TestGetFinancialData:
     def test_n_must_be_positive(self):
         """Test that n must be a positive integer."""
         with pytest.raises(ValueError, match="n must be a positive integer."):
-            get_financial_data(0, ["AAPL"])
+            get_financial_data(-1, ["AAPL"])
 
     def test_n_must_be_integer(self):
         """Test that n must be an integer."""

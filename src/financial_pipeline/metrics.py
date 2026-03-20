@@ -37,7 +37,7 @@ def get_financial_data(n: int, tickers: list[str]) -> pd.DataFrame:
     if n < 1:
         raise ValueError("n must be a positive integer.")
     elif not isinstance(n, int):
-        raise ValueError("n must be an integer.")
+        raise TypeError("n must be an integer.")
     elif n > len(tickers):
         raise ValueError(
             f"n must be less than or equal to the number of tickers ({len(tickers)})."
