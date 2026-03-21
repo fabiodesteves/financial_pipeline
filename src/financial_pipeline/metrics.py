@@ -88,7 +88,6 @@ def get_financial_data(tickers: list[str], n: int | None = None) -> pd.DataFrame
                 ev = market_cap + total_debt - cash_and_equivalents
                 op_income = income_statement["OperatingIncome"].dropna().iloc[-1]
             except KeyError as e:  # noqa: E722
-                print(f"Error calculating EV for {ticker}: {e}")
                 cash_and_equivalents = (
                     balance_sheet["CashAndCashEquivalents"].dropna().iloc[-1]
                 )
@@ -98,7 +97,6 @@ def get_financial_data(tickers: list[str], n: int | None = None) -> pd.DataFrame
                 dividend_raw = summary[ticker]["trailingAnnualDividendYield"]
                 dividend_yield = dividend_raw * 100
             except Exception as e:  # noqa: E722
-                print(f"Error calculating dividend yield for {ticker}: {e}, {type(e)}")
                 dividend_yield = 0
             try:
                 buyback = (
@@ -111,7 +109,6 @@ def get_financial_data(tickers: list[str], n: int | None = None) -> pd.DataFrame
                 )
                 buyback_yield = buyback * 100 / market_cap
             except Exception as e:  # noqa: E722
-                print(f"Error calculating buyback yield for {ticker}: {e}")
                 buyback_yield = 0
             data[ticker] = {
                 "P/E": round(market_cap / net_income, 2),
@@ -126,4 +123,4 @@ def get_financial_data(tickers: list[str], n: int | None = None) -> pd.DataFrame
             }
         except Exception as e:
             print(f"Error processing {ticker}: {e}")
-    return pd.DataFrame.from_dict(data, orient="index")
+    return pd.DataFrame.from_dict(data, orient="index").reset_index(names="ticker")
