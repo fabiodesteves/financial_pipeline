@@ -17,12 +17,12 @@ def get_sp500_tickers() -> list[str]:
     Raises:
         ValueError: If the API key is not set or the request fails.
     """
-    api_key = os.getenv("API_NINJAS_KEY")
-    if not api_key:
+    API_KEY = os.getenv("API_NINJAS_KEY")
+    if not API_KEY:
         raise ValueError("API_NINJAS_KEY environment variable is not set.")
 
     response = requests.get(
-        "https://api.api-ninjas.com/v1/sp500", headers={"X-Api-Key": api_key}
+        "https://api.api-ninjas.com/v1/sp500", headers={"X-Api-Key": API_KEY}
     )
     response.raise_for_status()
 
@@ -31,6 +31,7 @@ def get_sp500_tickers() -> list[str]:
 
 
 def get_sp500_dataframe() -> pd.DataFrame:
+    # TODO: maybe delete this function?
     """Fetches the S&P 500 data as a DataFrame.
 
     Returns:
@@ -39,12 +40,12 @@ def get_sp500_dataframe() -> pd.DataFrame:
     Raises:
         ValueError: If the API key is not set or the request fails.
     """
-    api_key = os.getenv("API_NINJAS_KEY")
-    if not api_key:
+    API_KEY = os.getenv("API_NINJAS_KEY")
+    if not API_KEY:
         raise ValueError("API_NINJAS_KEY environment variable is not set.")
 
     response = requests.get(
-        "https://api.api-ninjas.com/v1/sp500", headers={"X-Api-Key": api_key}
+        "https://api.api-ninjas.com/v1/sp500", headers={"X-Api-Key": API_KEY}
     )
     response.raise_for_status()
 
