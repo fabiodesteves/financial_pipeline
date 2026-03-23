@@ -4,6 +4,7 @@ import os
 import pandas as pd
 import requests
 from dotenv import load_dotenv
+from yahooquery import Ticker
 
 load_dotenv()
 
@@ -50,3 +51,130 @@ def get_sp500_dataframe() -> pd.DataFrame:
     response.raise_for_status()
 
     return pd.DataFrame(response.json())
+
+
+"""Module for calculating financial metrics from stock data."""
+
+
+def _validate_tickers_and_n(tickers: list[str], n: int | None) -> int:
+    """Validates tickers list and optional n parameter.
+
+    Args:
+        tickers: A list of financial stock tickers.
+        n: Optional number of tickers to process.
+
+    Returns:
+        The validated n value (or len(tickers) if n is None).
+
+    Raises:
+        TypeError: If tickers is not a list or contains non-string values,
+                   or if n is not an integer.
+        ValueError: If n is not positive or exceeds ticker count.
+    """
+    if not isinstance(tickers, list):
+        raise TypeError("tickers must be a list.")
+    if not all(isinstance(ticker, str) for ticker in tickers):
+        raise TypeError("All tickers must be strings.")
+
+    if n is not None:
+        if not isinstance(n, int) or isinstance(n, bool):
+            raise TypeError("n must be an integer.")
+        if n < 1:
+            raise ValueError("n must be a positive integer.")
+        if n > len(tickers):
+            raise ValueError(
+                f"n must be less than or equal to the number of tickers ({len(tickers)})."
+            )
+        return n
+
+    return len(tickers)
+
+
+def get_financial_data(tickers: list[str], n: int | None = None) -> pd.DataFrame:
+    """Gets financial data for the n first tickers provided.
+
+    Data gathered:
+        - "P/E"
+        - "Debt/Equity"
+        - "Enterprise Value (M)"
+        - "Market cap (M)"
+        - "Net income (M)"
+        - "Operating income (M)"
+        - "Dividend Yield (%)"
+        - "Shareholder Yield (%)"
+        - "Buyback Yield (%)"
+
+    Args:
+        tickers: A list of financial stock tickers.
+        n: The number of tickers to process (default: all tickers).
+
+    Returns:
+        pd.DataFrame: A DataFrame containing the financial data for the specified tickers.
+
+    Raises:
+        TypeError: If tickers is not a list, contains non-strings, or n is not an integer.
+        ValueError: If n is not positive or exceeds ticker count.
+    """
+    n = _validate_tickers_and_n(tickers, n)
+
+    data = {}
+    for ticker in tickers[:n]:
+        stock = Ticker(ticker)
+        # gather statements (useful for the metrics)
+        income_statement = stock.income_statement(frequency="a")
+        balance_sheet = stock.balance_sheet(frequency="q")
+        cash_flow = stock.cash_flow(frequency="a")
+        summary = stock.summary_detail
+        try:
+            market_cap = stock.price[ticker]["marketCap"]
+            revenue = income_statement["TotalRevenue"].dropna().iloc[-1]
+            free_cash_flow = cash_flow["FreeCashFlow"].dropna().iloc[-1]
+            net_income = income_statement["NetIncome"].dropna().iloc[-1]
+            equity = balance_sheet["StockholdersEquity"].dropna().iloc[-1]
+            liabilities = (
+                balance_sheet["TotalLiabilitiesNetMinorityInterest"].dropna().iloc[-1]
+            )
+            total_debt = balance_sheet["TotalDebt"].dropna().iloc[-1]
+            try:
+                cash_and_equivalents = (
+                    balance_sheet["CashCashEquivalentsAndShortTermInvestments"]
+                    .dropna()
+                    .iloc[-1]
+                )
+                operating_income = income_statement["OperatingIncome"].dropna().iloc[-1]
+            except Exception:
+                cash_and_equivalents = (
+                    balance_sheet["CashAndCashEquivalents"].dropna().iloc[-1]
+                )
+                operating_income = income_statement["PretaxIncome"].dropna().iloc[-1]
+            try:
+                dividend_raw = summary[ticker]["trailingAnnualDividendYield"]
+            except Exception:
+                dividend_raw = 0
+            try:
+                buyback = (
+                    (
+                        cash_flow["RepurchaseOfCapitalStock"].dropna().iloc[-1]
+                        + cash_flow["RepurchaseOfCapitalStock"].dropna().iloc[-2]
+                    )
+                    * -1
+                    / 2
+                )
+            except Exception:
+                buyback = 0
+            data[ticker] = {
+                "Revenue": revenue,
+                "Total debt": total_debt,
+                "Equity": equity,
+                "Liabilities": liabilities,
+                "Cash and equivalents": cash_and_equivalents,
+                "Free cash flow": free_cash_flow,
+                "Market cap": market_cap,
+                "Net income": net_income,
+                "Operating income": operating_income,
+                "Dividend (Raw)": dividend_raw,
+                "Buyback": buyback,
+            }
+        except Exception as e:
+            print(f"Error processing {ticker}: {e}")
+    return pd.DataFrame.from_dict(data, orient="index").reset_index(names="Ticker")
