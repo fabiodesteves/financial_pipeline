@@ -94,15 +94,17 @@ def get_financial_data(tickers: list[str], n: int | None = None) -> pd.DataFrame
     """Gets financial data for the n first tickers provided.
 
     Data gathered:
-        - "P/E"
-        - "Debt/Equity"
-        - "Enterprise Value (M)"
-        - "Market cap (M)"
-        - "Net income (M)"
-        - "Operating income (M)"
-        - "Dividend Yield (%)"
-        - "Shareholder Yield (%)"
-        - "Buyback Yield (%)"
+        - "Revenue"
+        - "Total debt"
+        - "Equity"
+        - "Liabilities"
+        - "Cash and equivalents"
+        - "Free cash flow"
+        - "Market cap"
+        - "Net income"
+        - "Operating income"
+        - "Dividend (Raw)"
+        - "Buyback"
 
     Args:
         tickers: A list of financial stock tickers.
@@ -125,8 +127,12 @@ def get_financial_data(tickers: list[str], n: int | None = None) -> pd.DataFrame
         balance_sheet = stock.balance_sheet(frequency="q")
         cash_flow = stock.cash_flow(frequency="a")
         summary = stock.summary_detail
+        price_data = stock.price.get(ticker)
+        if not isinstance(price_data, dict):
+            print(f"Error processing {ticker}: No price data available ({price_data})")
+            continue
         try:
-            market_cap = stock.price[ticker]["marketCap"]
+            market_cap = price_data.get("marketCap")
             revenue = income_statement["TotalRevenue"].dropna().iloc[-1]
             free_cash_flow = cash_flow["FreeCashFlow"].dropna().iloc[-1]
             net_income = income_statement["NetIncome"].dropna().iloc[-1]
@@ -134,7 +140,14 @@ def get_financial_data(tickers: list[str], n: int | None = None) -> pd.DataFrame
             liabilities = (
                 balance_sheet["TotalLiabilitiesNetMinorityInterest"].dropna().iloc[-1]
             )
-            total_debt = balance_sheet["TotalDebt"].dropna().iloc[-1]
+            try:
+                total_debt = balance_sheet["TotalDebt"].dropna().iloc[-1]
+            except (KeyError, IndexError):
+                total_debt = (
+                    balance_sheet["LongTermDebt"].dropna().iloc[-1]
+                    if "LongTermDebt" in balance_sheet.columns
+                    else None
+                )
             try:
                 cash_and_equivalents = (
                     balance_sheet["CashCashEquivalentsAndShortTermInvestments"]

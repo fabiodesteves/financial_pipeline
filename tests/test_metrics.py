@@ -1,7 +1,7 @@
 """Tests for the metrics module."""
 
 import pytest
-from financial_pipeline.metrics import get_financial_data
+from financial_pipeline.extract import get_financial_data
 
 
 class TestGetFinancialData:
