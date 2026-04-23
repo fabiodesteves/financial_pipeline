@@ -1,0 +1,41 @@
+version: 2
+
+models:
+  - name: stg_financials
+    description: "Staging financial metrics schema."
+    columns:
+      - name: ticker
+        description: "The ticker from the S&P 500 list."
+      
+      - name: revenue
+        description: "Revenue, in USD."
+      
+      - name: net_income
+        description: "Net income, in USD."
+      
+      - name: operating_income
+        description: "Operating income, in USD."
+      
+      - name: total_debt
+        description: "Total debt, in USD."
+      
+      - name: equity
+        description: "Company equity, in USD, defined as assets - liabilities."
+      
+      - name: liabilities
+        description: "Company's liabilities, in USD."
+      
+      - name: cash_and_equivalents
+        description: "Cash and equivalents, in USD."
+
+      - name: market_cap
+        description: "Market capitalization, in USD."
+      
+      - name: free_cash_flow
+        description: "Free cash flow, in USD."
+
+      - name: buyback
+        description: "Buyback, in USD. "
+
+      - name: dividend_yield
+        description: "Trailing annual dividend yield, expressed as a decimal (e.g. 0.01 = 1%)."

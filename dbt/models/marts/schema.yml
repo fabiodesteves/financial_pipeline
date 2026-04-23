@@ -1,0 +1,41 @@
+version: 2
+
+models:
+  - name: fct_financial_metrics
+    description: "Fact financial metrics table schema."
+    columns:
+      - name: ticker
+        description: "The ticker from the S&P 500 list."
+
+      - name: market_cap_m
+        description: "Market capitalization, in millions USD."
+
+      - name: net_income_m
+        description: "Net income, in millions USD."
+
+      - name: revenue_m
+        description: "Revenue, in millions USD."
+
+      - name: operating_income_m
+        description: "Operating income, in millions USD."
+
+      - name: total_debt_m
+        description: "Total debt, in millions USD."
+
+      - name: cash_and_equivalents_m
+        description: "Cash and equivalents, in millions USD."
+
+      - name: free_cash_flow_m
+        description: "Free cash flow, in millions USD."
+
+      - name: dividend_yield_pct
+        description: "Dividend, in percentage."
+
+      - name: buyback_m
+        description: "Buyback, in millions USD."
+
+      - name: enterprise_value_m
+        description: "Enterprise value, in millions, defined as market capitalization plus total debt minus cash and equivalents."
+
+      - name: ev_to_ebit
+        description: "Enterprise value divided by the operating income (earnings before interest and taxes.)"
